@@ -5,10 +5,114 @@ document.addEventListener('DOMContentLoaded', function() {
   initThemeSystem();
   initFormAnimations();
   initTouchOptimizations();
+  initAuthHandlers();
   
   // Auto-detect system theme preference
   detectSystemTheme();
 });
+
+const AUTH_STORAGE_KEY = 'users';
+const CURRENT_USER_KEY = 'currentUser';
+const REMEMBER_KEY = 'rememberedUser';
+
+function getStoredUsers() {
+  return JSON.parse(localStorage.getItem(AUTH_STORAGE_KEY) || '[]');
+}
+
+function saveStoredUsers(users) {
+  localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(users));
+}
+
+function setCurrentUser(user, remember) {
+  localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(user));
+  if (remember) {
+    localStorage.setItem(REMEMBER_KEY, JSON.stringify({ login: user.username || user.email }));
+  } else {
+    localStorage.removeItem(REMEMBER_KEY);
+  }
+}
+
+function initAuthHandlers() {
+  const loginForm = document.getElementById('loginForm');
+  const remembered = JSON.parse(localStorage.getItem(REMEMBER_KEY) || 'null');
+
+  if (remembered?.login) {
+    const usernameInput = document.getElementById('username');
+    usernameInput.value = remembered.login;
+    document.getElementById('rememberMe').checked = true;
+  }
+
+  loginForm.addEventListener('submit', (event) => {
+    event.preventDefault();
+    handleLogin();
+  });
+}
+
+function handleLogin() {
+  const usernameInput = document.getElementById('username');
+  const passwordInput = document.getElementById('password');
+  const rememberMe = document.getElementById('rememberMe').checked;
+
+  const identifier = usernameInput.value.trim();
+  const password = passwordInput.value;
+
+  if (!identifier || !password) {
+    showError('Please enter your username/email and password.');
+    return;
+  }
+
+  const users = getStoredUsers();
+  const user = users.find((candidate) => {
+    const match = [candidate.username, candidate.email].some(
+      (value) => value && value.toLowerCase() === identifier.toLowerCase()
+    );
+    return match && candidate.password === password;
+  });
+
+  if (!user) {
+    showError('Invalid credentials. Please try again or reset your password.');
+    return;
+  }
+
+  setCurrentUser(user, rememberMe);
+  const loginButton = document.getElementById('loginButton');
+  const buttonText = document.getElementById('buttonText');
+  loginButton.disabled = true;
+  buttonText.textContent = 'Signing you in...';
+
+  setTimeout(() => {
+    window.location.href = 'main.html';
+  }, 800);
+}
+
+function loginWithProvider(provider) {
+  const users = getStoredUsers();
+  const providerLabel = provider === 'google' ? 'Google' : 'Facebook';
+  const providerUser = {
+    id: `social_${provider}_${Date.now()}`,
+    username: `${provider}_trader`,
+    email: `${provider}_trader@${provider}.example`,
+    password: 'oauth',
+    provider,
+    createdAt: new Date().toISOString(),
+    verified: true
+  };
+
+  const existing = users.find((user) => user.provider === provider);
+  const activeUser = existing || providerUser;
+
+  if (!existing) {
+    users.push(activeUser);
+    saveStoredUsers(users);
+  }
+
+  setCurrentUser(activeUser, true);
+  showError(`${providerLabel} authentication completed. Redirecting to your workspace...`);
+
+  setTimeout(() => {
+    window.location.href = 'main.html';
+  }, 900);
+}
 
 function initResponsiveDesign() {
   // Update layout on resize
@@ -213,6 +317,10 @@ function togglePassword() {
   const toggleBtn = document.querySelector('.password-toggle i');
   const isTouchDevice = 'ontouchstart' in window;
   
+  if (!toggleBtn) {
+    return;
+  }
+
   if (passwordInput.type === 'password') {
     passwordInput.type = 'text';
     toggleBtn.className = 'fas fa-eye-slash';

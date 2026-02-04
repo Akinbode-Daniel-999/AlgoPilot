@@ -112,7 +112,7 @@ body {
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  transition: background var(--transition-slow);
+  transition: background var(--transition-slow), color var(--transition-normal);
 }
 
 @keyframes gradientBG {
@@ -903,7 +903,7 @@ body {
   font-size: var(--font-size-md);
   font-weight: 500;
   cursor: pointer;
-  transition: all var(--transition-normal);
+  transition: transform var(--transition-normal), border-color var(--transition-normal), background var(--transition-normal);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -923,9 +923,9 @@ body {
   border-color: #DB4437;
 }
 
-.social-btn.github:hover {
-  background: rgba(51, 51, 51, 0.1);
-  border-color: #333;
+.social-btn.facebook:hover {
+  background: rgba(24, 119, 242, 0.12);
+  border-color: #1877F2;
 }
 
 /* Auth Links */

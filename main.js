@@ -1,13 +1,24 @@
 // ==================== AUTHENTICATION ====================
 // Check if user is logged in
-let currentUser = JSON.parse(localStorage.getItem("currentUser"));
+let currentUser = JSON.parse(localStorage.getItem("currentUser") || 'null');
+
+if (typeof currentUser === 'string') {
+    const users = JSON.parse(localStorage.getItem('users') || '[]');
+    const resolvedUser = users.find((user) => user.id === currentUser);
+    if (resolvedUser) {
+        currentUser = resolvedUser;
+        localStorage.setItem('currentUser', JSON.stringify(resolvedUser));
+    } else {
+        currentUser = null;
+    }
+}
 
 if (!currentUser) {
     // If no user is logged in, redirect to login
     window.location.href = "login.html";
 } else {
     // Show logged-in username
-    document.getElementById("userName").textContent = currentUser.username;
+    document.getElementById("userName").textContent = currentUser.username || currentUser.email || 'Trader';
 }
 
 // Logout function

@@ -61,6 +61,26 @@
             <div id="marketOverview" class="market-overview"></div>
         </div>
 
+        <!-- Project Overview -->
+        <div class="strategy-info project-overview">
+            <div class="strategy-header">
+                <h3>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style="display: inline-block; vertical-align: middle; margin-right: 8px;">
+                        <path d="M9 5H7C5.89543 5 5 5.89543 5 7V19C5 20.1046 5.89543 21 7 21H17C18.1046 21 19 20.1046 19 19V7C19 5.89543 18.1046 5 17 5H15M9 5C9 6.10457 9.89543 7 11 7H13C14.1046 7 15 6.10457 15 5M9 5C9 3.89543 9.89543 3 11 3H13C14.1046 3 15 3.89543 15 5M12 12H15M12 16H15M9 12H9.01M9 16H9.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    Final Year Project: FX & Crypto Algorithmic Trading
+                </h3>
+                <span class="strategy-badge">RESEARCH</span>
+            </div>
+            <p>This dashboard demonstrates the design and implementation of an algorithmic trading strategy for foreign exchange and cryptocurrency markets.</p>
+            <ul class="project-list">
+                <li>📊 Live market ingestion, preprocessing, and technical indicator pipeline.</li>
+                <li>🧠 Dual moving-average crossover with RSI confirmation and volatility safeguards.</li>
+                <li>🛡️ Risk controls: position sizing, capital allocation, and drawdown monitoring.</li>
+                <li>📈 Backtesting, performance analytics, and trade journaling for evaluation.</li>
+            </ul>
+        </div>
+
         <!-- Strategy Info -->
         <div class="strategy-info">
             <div class="strategy-header">
@@ -68,13 +88,11 @@
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style="display: inline-block; vertical-align: middle; margin-right: 8px;">
                         <path d="M9 5H7C5.89543 5 5 5.89543 5 7V19C5 20.1046 5.89543 21 7 21H17C18.1046 21 19 20.1046 19 19V7C19 5.89543 18.1046 5 17 5H15M9 5C9 6.10457 9.89543 7 11 7H13C14.1046 7 15 6.10457 15 5M9 5C9 3.89543 9.89543 3 11 3H13C14.1046 3 15 3.89543 15 5M12 12H15M12 16H15M9 12H9.01M9 16H9.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                     </svg>
-                    Strategy: Moving Average Crossover with RSI Filter
+                    Strategy: Moving Average Crossover + RSI Filter
                 </h3>
                 <span class="strategy-badge">ACTIVE</span>
             </div>
-            <p>Real-time algorithmic trading using dual moving average crossover combined with RSI filtering. 
-            Buy signals when fast MA crosses above slow MA with RSI < 70. Sell signals when fast MA crosses below slow MA with RSI > 30. 
-            Powered by live market data from multiple sources.</p>
+            <p>Buy signals trigger when the fast MA crosses above the slow MA while RSI remains below 70. Sell signals trigger when the fast MA crosses below the slow MA while RSI is above 30. The system blends FX and crypto feeds to compare cross-market regimes.</p>
         </div>
 
         <!-- Trading Controls -->
