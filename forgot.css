@@ -1,0 +1,24 @@
+@import url("login.css");
+
+.status-msg {
+  text-align: center;
+  margin-top: var(--spacing-md);
+  padding: var(--spacing-md);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  display: none;
+}
+
+.status-msg.success {
+  display: block;
+  color: var(--success-color);
+  background: rgba(46, 204, 113, 0.12);
+  border: 1px solid rgba(46, 204, 113, 0.2);
+}
+
+.status-msg.error {
+  display: block;
+  color: var(--error-color);
+  background: rgba(255, 107, 107, 0.1);
+  border: 1px solid rgba(255, 107, 107, 0.2);
+}
