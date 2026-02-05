@@ -52,8 +52,8 @@
             </div>
         </div>
         
-        <h2>Create Your Trading Account</h2>
-        <p class="subtitle">Start your algorithmic trading journey today</p>
+        <h2>Create Your AlgoPilot Account</h2>
+        <p class="subtitle">Design and implement a FX & crypto trading strategy for your final year project</p>
         
         <!-- Signup Form -->
         <form id="signupForm">
@@ -347,12 +347,18 @@
             </div>
             
             <div class="social-buttons">
-                <button class="social-btn google" onclick="signupWithGoogle()">
+                <button class="social-btn google" onclick="signupWithProvider('google')">
                     <i class="fab fa-google"></i> Google
                 </button>
-                <button class="social-btn github" onclick="signupWithGithub()">
-                    <i class="fab fa-github"></i> GitHub
+                <button class="social-btn facebook" onclick="signupWithProvider('facebook')">
+                    <i class="fab fa-facebook-f"></i> Facebook
                 </button>
+            </div>
+
+            <div class="oauth-links">
+                <p>OAuth redirect page: <code id="oauthRedirectPath">oauth-callback.html</code></p>
+                <a id="googleOAuthLink" href="#" target="_blank" rel="noopener">Google OAuth link</a>
+                <a id="facebookOAuthLink" href="#" target="_blank" rel="noopener">Facebook OAuth link</a>
             </div>
         </div>
         

@@ -51,7 +51,7 @@ body {
     padding: 20px;
     color: var(--text-primary);
     min-height: 100vh;
-    transition: all 0.3s ease;
+    transition: background 0.3s ease, color 0.3s ease;
 }
 
 .container {
@@ -257,6 +257,7 @@ input:checked + .slider::before {
     margin-bottom: 24px;
     border: 1px solid var(--border-color);
     box-shadow: 0 4px 20px var(--card-shadow);
+    transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .strategy-header {
@@ -298,6 +299,24 @@ input:checked + .slider::before {
     line-height: 1.7;
     color: var(--text-secondary);
     font-size: 14px;
+}
+
+.project-list {
+    margin-top: 12px;
+    padding-left: 0;
+    list-style: none;
+    display: grid;
+    gap: 8px;
+    color: var(--text-secondary);
+    font-size: 14px;
+}
+
+.project-list li {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    padding: 10px 12px;
+    border-radius: 10px;
+    transition: background 0.3s ease, border-color 0.3s ease;
 }
 
 /* Controls Section */

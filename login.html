@@ -39,7 +39,8 @@
             </div>
         </div>
         
-        <h2>Welcome to AlgoTrade</h2>
+        <h2>Welcome back to AlgoPilot</h2>
+        <p class="subtitle">Algorithmic FX & crypto trading for your final year project</p>
         
         <form id="loginForm">
             <!-- Username Field -->
@@ -64,31 +65,18 @@
                     autocomplete="current-password"
                 >
                 <i class="fas fa-lock"></i>
-                <span style="
-                    position: absolute;
-                    right: 15px;
-                    top: 50%;
-                    transform: translateY(-50%);
-                    cursor: pointer;
-                    color: rgba(255, 255, 255, 0.5);
-                " onclick="togglePassword()">
+                <button type="button" class="password-toggle" onclick="togglePassword()" aria-label="Toggle password visibility">
                     <i class="fas fa-eye"></i>
-                </span>
+                </button>
             </div>
             
             <!-- Remember Me & Forgot Password -->
-            <div style="
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                margin-bottom: 25px;
-                font-size: 14px;
-            ">
-                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-                    <input type="checkbox" id="rememberMe" style="width: auto;">
+            <div class="form-options">
+                <label class="remember-me">
+                    <input type="checkbox" id="rememberMe">
                     <span>Remember me</span>
                 </label>
-                <a href="#" style="color: var(--accent-color); text-decoration: none;">
+                <a href="forgot.html" class="forgot-password">
                     Forgot Password?
                 </a>
             </div>
@@ -103,91 +91,30 @@
         </form>
         
         <!-- Social Login -->
-        <div style="
-            margin: 25px 0;
-            text-align: center;
-            position: relative;
-        ">
-            <div style="
-                height: 1px;
-                background: rgba(255, 255, 255, 0.1);
-                margin: 20px 0;
-                position: relative;
-            ">
-                <span style="
-                    position: absolute;
-                    top: 50%;
-                    left: 50%;
-                    transform: translate(-50%, -50%);
-                    background: var(--card-bg);
-                    padding: 0 15px;
-                    font-size: 12px;
-                    color: rgba(255, 255, 255, 0.5);
-                ">
-                    Or continue with
-                </span>
+        <div class="social-auth">
+            <div class="divider">
+                <span>Or continue with</span>
             </div>
-            
-            <div style="
-                display: flex;
-                justify-content: center;
-                gap: 15px;
-                margin-top: 20px;
-            ">
-                <button style="
-                    width: 45px;
-                    height: 45px;
-                    border-radius: 50%;
-                    border: 1px solid rgba(255, 255, 255, 0.1);
-                    background: rgba(255, 255, 255, 0.05);
-                    color: white;
-                    cursor: pointer;
-                    transition: all 0.3s ease;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                " onmouseover="this.style.transform='scale(1.1)';this.style.background='rgba(255,255,255,0.1)'"
-                   onmouseout="this.style.transform='scale(1)';this.style.background='rgba(255,255,255,0.05)'">
+
+            <div class="social-login">
+                <button class="social-btn google" type="button" onclick="loginWithProvider('google')">
                     <i class="fab fa-google"></i>
                 </button>
-                <button style="
-                    width: 45px;
-                    height: 45px;
-                    border-radius: 50%;
-                    border: 1px solid rgba(255, 255, 255, 0.1);
-                    background: rgba(255, 255, 255, 0.05);
-                    color: white;
-                    cursor: pointer;
-                    transition: all 0.3s ease;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                " onmouseover="this.style.transform='scale(1.1)';this.style.background='rgba(255,255,255,0.1)'"
-                   onmouseout="this.style.transform='scale(1)';this.style.background='rgba(255,255,255,0.05)'">
-                    <i class="fab fa-github"></i>
+                <button class="social-btn facebook" type="button" onclick="loginWithProvider('facebook')">
+                    <i class="fab fa-facebook-f"></i>
                 </button>
-                <button style="
-                    width: 45px;
-                    height: 45px;
-                    border-radius: 50%;
-                    border: 1px solid rgba(255, 255, 255, 0.1);
-                    background: rgba(255, 255, 255, 0.05);
-                    color: white;
-                    cursor: pointer;
-                    transition: all 0.3s ease;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                " onmouseover="this.style.transform='scale(1.1)';this.style.background='rgba(255,255,255,0.1)'"
-                   onmouseout="this.style.transform='scale(1)';this.style.background='rgba(255,255,255,0.05)'">
-                    <i class="fab fa-microsoft"></i>
-                </button>
+            </div>
+
+            <div class="oauth-links">
+                <p>OAuth redirect page: <code id="oauthRedirectPath">oauth-callback.html</code></p>
+                <a id="googleOAuthLink" href="#" target="_blank" rel="noopener">Google OAuth link</a>
+                <a id="facebookOAuthLink" href="#" target="_blank" rel="noopener">Facebook OAuth link</a>
             </div>
         </div>
         
         <!-- Sign Up Link -->
         <div class="auth-links">
-            New to AlgoTrade? 
+            New to AlgoPilot? 
             <a href="signup.html" id="signupLink">
                 Create an account
                 <i class="fas fa-arrow-right" style="margin-left: 5px;"></i>

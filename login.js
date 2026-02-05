@@ -5,10 +5,154 @@ document.addEventListener('DOMContentLoaded', function() {
   initThemeSystem();
   initFormAnimations();
   initTouchOptimizations();
+  initAuthHandlers();
   
   // Auto-detect system theme preference
   detectSystemTheme();
 });
+
+const AUTH_STORAGE_KEY = 'users';
+const CURRENT_USER_KEY = 'currentUser';
+const REMEMBER_KEY = 'rememberedUser';
+const OAUTH_CONFIG = {
+  google: {
+    authUrl: 'https://accounts.google.com/o/oauth2/v2/auth',
+    scope: 'openid email profile',
+    clientId: 'YOUR_GOOGLE_CLIENT_ID'
+  },
+  facebook: {
+    authUrl: 'https://www.facebook.com/v18.0/dialog/oauth',
+    scope: 'email public_profile',
+    clientId: 'YOUR_FACEBOOK_APP_ID'
+  }
+};
+
+function getStoredUsers() {
+  return JSON.parse(localStorage.getItem(AUTH_STORAGE_KEY) || '[]');
+}
+
+function saveStoredUsers(users) {
+  localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(users));
+}
+
+function setCurrentUser(user, remember) {
+  localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(user));
+  if (remember) {
+    localStorage.setItem(REMEMBER_KEY, JSON.stringify({ login: user.username || user.email }));
+  } else {
+    localStorage.removeItem(REMEMBER_KEY);
+  }
+}
+
+function initAuthHandlers() {
+  const loginForm = document.getElementById('loginForm');
+  const remembered = JSON.parse(localStorage.getItem(REMEMBER_KEY) || 'null');
+
+  if (remembered?.login) {
+    const usernameInput = document.getElementById('username');
+    usernameInput.value = remembered.login;
+    document.getElementById('rememberMe').checked = true;
+  }
+
+  loginForm.addEventListener('submit', (event) => {
+    event.preventDefault();
+    handleLogin();
+  });
+
+  hydrateOAuthLinks();
+}
+
+function handleLogin() {
+  const usernameInput = document.getElementById('username');
+  const passwordInput = document.getElementById('password');
+  const rememberMe = document.getElementById('rememberMe').checked;
+
+  const identifier = usernameInput.value.trim();
+  const password = passwordInput.value;
+
+  if (!identifier || !password) {
+    showError('Please enter your username/email and password.');
+    return;
+  }
+
+  const users = getStoredUsers();
+  const user = users.find((candidate) => {
+    const match = [candidate.username, candidate.email].some(
+      (value) => value && value.toLowerCase() === identifier.toLowerCase()
+    );
+    return match && candidate.password === password;
+  });
+
+  if (!user) {
+    showError('Invalid credentials. Please try again or reset your password.');
+    return;
+  }
+
+  setCurrentUser(user, rememberMe);
+  const loginButton = document.getElementById('loginButton');
+  const buttonText = document.getElementById('buttonText');
+  loginButton.disabled = true;
+  buttonText.textContent = 'Signing you in...';
+
+  setTimeout(() => {
+    window.location.href = 'main.html';
+  }, 800);
+}
+
+function loginWithProvider(provider) {
+  startOAuthFlow(provider, 'login.html');
+}
+
+function hydrateOAuthLinks() {
+  const redirectPath = 'oauth-callback.html';
+  const redirectUri = buildRedirectUri(redirectPath);
+  const redirectLabel = document.getElementById('oauthRedirectPath');
+  const googleLink = document.getElementById('googleOAuthLink');
+  const facebookLink = document.getElementById('facebookOAuthLink');
+
+  if (redirectLabel) {
+    redirectLabel.textContent = redirectPath;
+  }
+
+  if (googleLink) {
+    googleLink.href = buildOAuthUrl('google', redirectUri, 'login.html');
+  }
+
+  if (facebookLink) {
+    facebookLink.href = buildOAuthUrl('facebook', redirectUri, 'login.html');
+  }
+}
+
+function startOAuthFlow(provider, returnTo) {
+  window.location.href = buildCallbackUrl(provider, returnTo);
+}
+
+function buildRedirectUri(path) {
+  if (window.location.origin === 'null') {
+    return path;
+  }
+  return `${window.location.origin}/${path}`;
+}
+
+function buildOAuthUrl(provider, redirectUri, returnTo) {
+  const config = OAUTH_CONFIG[provider];
+  const params = new URLSearchParams({
+    client_id: config.clientId,
+    redirect_uri: redirectUri,
+    response_type: 'code',
+    scope: config.scope,
+    state: JSON.stringify({ provider, returnTo })
+  });
+  return `${config.authUrl}?${params.toString()}`;
+}
+
+function buildCallbackUrl(provider, returnTo) {
+  const params = new URLSearchParams({
+    provider,
+    returnTo
+  });
+  return `oauth-callback.html?${params.toString()}`;
+}
 
 function initResponsiveDesign() {
   // Update layout on resize
@@ -213,6 +357,10 @@ function togglePassword() {
   const toggleBtn = document.querySelector('.password-toggle i');
   const isTouchDevice = 'ontouchstart' in window;
   
+  if (!toggleBtn) {
+    return;
+  }
+
   if (passwordInput.type === 'password') {
     passwordInput.type = 'text';
     toggleBtn.className = 'fas fa-eye-slash';

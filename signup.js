@@ -7,12 +7,95 @@ document.addEventListener('DOMContentLoaded', function() {
   initFormValidation();
   initTouchOptimizations();
   detectSystemTheme();
+  hydrateOAuthLinks();
   
   // Set maximum birth date (must be 18+)
   const today = new Date();
   const minDate = new Date(today.getFullYear() - 18, today.getMonth(), today.getDate());
   document.getElementById('birthDate').max = minDate.toISOString().split('T')[0];
 });
+
+const AUTH_STORAGE_KEY = 'users';
+const CURRENT_USER_KEY = 'currentUser';
+const OAUTH_CONFIG = {
+  google: {
+    authUrl: 'https://accounts.google.com/o/oauth2/v2/auth',
+    scope: 'openid email profile',
+    clientId: 'YOUR_GOOGLE_CLIENT_ID'
+  },
+  facebook: {
+    authUrl: 'https://www.facebook.com/v18.0/dialog/oauth',
+    scope: 'email public_profile',
+    clientId: 'YOUR_FACEBOOK_APP_ID'
+  }
+};
+
+function getStoredUsers() {
+  return JSON.parse(localStorage.getItem(AUTH_STORAGE_KEY) || '[]');
+}
+
+function saveStoredUsers(users) {
+  localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(users));
+}
+
+function setCurrentUser(user) {
+  localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(user));
+}
+
+function validateStep1() {
+  const username = document.getElementById('newUsername').value.trim();
+  const email = document.getElementById('email').value.trim();
+  const password = document.getElementById('newPassword').value;
+  const confirmPassword = document.getElementById('confirmPassword').value;
+  const errorMsg = document.getElementById('errorMsg');
+
+  errorMsg.textContent = '';
+  errorMsg.style.display = 'none';
+
+  if (!username || username.length < 3) {
+    showError('Username must be at least 3 characters');
+    return false;
+  }
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    showError('Please enter a valid email address');
+    return false;
+  }
+
+  if (password.length < 8) {
+    showError('Password must be at least 8 characters');
+    return false;
+  }
+
+  if (password !== confirmPassword) {
+    showError('Passwords do not match');
+    return false;
+  }
+
+  const strength = checkPasswordStrength(password);
+  if (strength.score < 3) {
+    showError('Password is too weak. Please use a stronger password.');
+    return false;
+  }
+
+  return true;
+}
+
+function validateStep2() {
+  return true;
+}
+
+function validateStep3() {
+  const terms = document.getElementById('terms');
+
+  if (!terms.checked) {
+    showError('You must agree to the Terms of Service and Privacy Policy');
+    return false;
+  }
+
+  return true;
+}
 
 // Theme System
 function initThemeSystem() {
@@ -182,74 +265,6 @@ function initFormSteps() {
         return true;
     }
   }
-  
-  function validateStep1() {
-    const username = document.getElementById('newUsername').value.trim();
-    const email = document.getElementById('email').value.trim();
-    const password = document.getElementById('newPassword').value;
-    const confirmPassword = document.getElementById('confirmPassword').value;
-    
-    let isValid = true;
-    const errorMsg = document.getElementById('errorMsg');
-    
-    // Reset error
-    errorMsg.textContent = '';
-    errorMsg.style.display = 'none';
-    
-    // Validate username
-    if (!username || username.length < 3) {
-      showError('Username must be at least 3 characters');
-      isValid = false;
-    }
-    
-    // Validate email
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      showError('Please enter a valid email address');
-      isValid = false;
-    }
-    
-    // Validate password
-    if (password.length < 8) {
-      showError('Password must be at least 8 characters');
-      isValid = false;
-    }
-    
-    // Check password match
-    if (password !== confirmPassword) {
-      showError('Passwords do not match');
-      isValid = false;
-    }
-    
-    // Check password strength
-    const strength = checkPasswordStrength(password);
-    if (strength.score < 3) {
-      showError('Password is too weak. Please use a stronger password.');
-      isValid = false;
-    }
-    
-    if (isValid) {
-      errorMsg.style.display = 'none';
-    }
-    
-    return isValid;
-  }
-  
-  function validateStep2() {
-    // Step 2 is mostly optional, so just return true
-    return true;
-  }
-  
-  function validateStep3() {
-    const terms = document.getElementById('terms');
-    
-    if (!terms.checked) {
-      showError('You must agree to the Terms of Service and Privacy Policy');
-      return false;
-    }
-    
-    return true;
-  }
 }
 
 // Password Validation
@@ -402,7 +417,7 @@ function initFormValidation() {
       
       // Redirect after delay
       setTimeout(() => {
-        window.location.href = 'dashboard.html';
+        window.location.href = 'main.html';
       }, 2000);
       
     } catch (error) {
@@ -417,62 +432,106 @@ async function simulateSignup(formData) {
   return new Promise((resolve, reject) => {
     setTimeout(() => {
       // Simulate server validation
-      const existingUsers = ['admin', 'trader', 'demo'];
-      
-      if (existingUsers.includes(formData.username.toLowerCase())) {
+      const users = getStoredUsers();
+      const usernameExists = users.some(
+        (user) => user.username?.toLowerCase() === formData.username.toLowerCase()
+      );
+      const emailExists = users.some(
+        (user) => user.email?.toLowerCase() === formData.email.toLowerCase()
+      );
+
+      if (usernameExists) {
         reject(new Error('Username already exists'));
-      } else if (!formData.email.includes('@')) {
-        reject(new Error('Invalid email address'));
-      } else if (formData.password.length < 8) {
-        reject(new Error('Password must be at least 8 characters'));
-      } else {
-        // Simulate successful signup
-        const user = {
-          id: Math.random().toString(36).substr(2, 9),
-          ...formData,
-          createdAt: new Date().toISOString(),
-          verified: false,
-          balance: 10000 // Demo starting balance
-        };
-        
-        // Save to localStorage (simulating backend)
-        localStorage.setItem('user_' + user.id, JSON.stringify(user));
-        localStorage.setItem('currentUser', user.id);
-        
-        resolve({ success: true, user });
+        return;
       }
+
+      if (emailExists) {
+        reject(new Error('Email already exists'));
+        return;
+      }
+
+      if (!formData.email.includes('@')) {
+        reject(new Error('Invalid email address'));
+        return;
+      }
+
+      if (formData.password.length < 8) {
+        reject(new Error('Password must be at least 8 characters'));
+        return;
+      }
+
+      const user = {
+        id: Math.random().toString(36).substr(2, 9),
+        ...formData,
+        createdAt: new Date().toISOString(),
+        verified: false,
+        balance: 10000
+      };
+
+      users.push(user);
+      saveStoredUsers(users);
+      setCurrentUser(user);
+
+      resolve({ success: true, user });
     }, 1500);
   });
 }
 
 // Social Signup Functions
-window.signupWithGoogle = function() {
-  const button = document.querySelector('.social-btn.google');
-  const originalText = button.innerHTML;
-  
-  button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Connecting...';
-  button.disabled = true;
-  
-  setTimeout(() => {
-    button.innerHTML = originalText;
-    button.disabled = false;
-    showError('Google signup is currently unavailable. Please use email signup.');
-  }, 1000);
+window.signupWithProvider = function(provider) {
+  startOAuthFlow(provider, 'signup.html');
 };
 
-window.signupWithGithub = function() {
-  const button = document.querySelector('.social-btn.github');
-  const originalText = button.innerHTML;
-  
-  button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Connecting...';
-  button.disabled = true;
-  
-  setTimeout(() => {
-    button.innerHTML = originalText;
-    button.disabled = false;
-    showError('GitHub signup is currently unavailable. Please use email signup.');
-  }, 1000);
-};
+function hydrateOAuthLinks() {
+  const redirectPath = 'oauth-callback.html';
+  const redirectUri = buildRedirectUri(redirectPath);
+  const redirectLabel = document.getElementById('oauthRedirectPath');
+  const googleLink = document.getElementById('googleOAuthLink');
+  const facebookLink = document.getElementById('facebookOAuthLink');
+
+  if (redirectLabel) {
+    redirectLabel.textContent = redirectPath;
+  }
+
+  if (googleLink) {
+    googleLink.href = buildOAuthUrl('google', redirectUri, 'signup.html');
+  }
+
+  if (facebookLink) {
+    facebookLink.href = buildOAuthUrl('facebook', redirectUri, 'signup.html');
+  }
+}
+
+function startOAuthFlow(provider, returnTo) {
+  window.location.href = buildCallbackUrl(provider, returnTo);
+}
+
+function buildRedirectUri(path) {
+  if (window.location.origin === 'null') {
+    return path;
+  }
+  return `${window.location.origin}/${path}`;
+}
+
+function buildOAuthUrl(provider, redirectUri, returnTo) {
+  const config = OAUTH_CONFIG[provider];
+  const params = new URLSearchParams({
+    client_id: config.clientId,
+    redirect_uri: redirectUri,
+    response_type: 'code',
+    scope: config.scope,
+    state: JSON.stringify({ provider, returnTo })
+  });
+  return `${config.authUrl}?${params.toString()}`;
+}
+
+function buildCallbackUrl(provider, returnTo) {
+  const params = new URLSearchParams({
+    provider,
+    returnTo
+  });
+  return `oauth-callback.html?${params.toString()}`;
+}
 
 // Touch Optimizations
 function initTouchOptimizations() {

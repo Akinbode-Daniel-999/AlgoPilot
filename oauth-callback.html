@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OAuth Callback | AlgoPilot</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="oauth-callback.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+</head>
+<body>
+    <div class="floating-element"></div>
+    <div class="floating-element"></div>
+
+    <div class="theme-toggle" id="themeToggle">
+        <i class="fas fa-moon"></i>
+    </div>
+
+    <div class="auth-card animate__animated animate__fadeIn">
+        <div class="logo" style="text-align: center; margin-bottom: 20px;">
+            <div style="
+                width: 60px;
+                height: 60px;
+                background: linear-gradient(135deg, #2d7a2d, #00d4ff);
+                border-radius: 15px;
+                margin: 0 auto 15px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 24px;
+                color: white;
+                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            ">
+                <i class="fas fa-shield-alt"></i>
+            </div>
+        </div>
+
+        <h2>Connecting your account</h2>
+        <p class="subtitle">Completing OAuth sign-in and redirecting you to AlgoPilot.</p>
+
+        <div class="status-msg" id="statusMsg"></div>
+
+        <div class="auth-links">
+            Need to retry?
+            <a href="login.html">
+                Back to login
+                <i class="fas fa-arrow-right" style="margin-left: 5px;"></i>
+            </a>
+        </div>
+    </div>
+
+    <script src="oauth-callback.js"></script>
+</body>
+</html>
