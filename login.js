@@ -107,7 +107,7 @@ function loginWithProvider(provider) {
   }
 
   setCurrentUser(activeUser, true);
-  showError(`${providerLabel} authentication completed. Redirecting to your workspace...`);
+  showStatus(`${providerLabel} sign-in successful. Redirecting to your workspace...`, 'success');
 
   setTimeout(() => {
     window.location.href = 'main.html';
@@ -368,30 +368,37 @@ function showTouchTooltip(message) {
   }, 2000);
 }
 
-// Enhanced error handling with responsive messages
-function showError(message) {
+// Enhanced status handling with responsive messages
+
+function showStatus(message, type = 'error') {
   const errorMsg = document.getElementById('errorMsg');
-  
-  // Clear any existing timeout
+
   if (window.errorTimeout) {
     clearTimeout(window.errorTimeout);
   }
-  
-  // Set message and show
+
   errorMsg.textContent = message;
   errorMsg.style.display = 'block';
-  
-  // Auto-hide after delay (longer on mobile)
+  errorMsg.classList.remove('success-msg');
+  if (type === 'success') {
+    errorMsg.classList.add('success-msg');
+  }
+
   const isMobile = window.innerWidth <= 480;
   const delay = isMobile ? 7000 : 5000;
-  
+
   window.errorTimeout = setTimeout(() => {
     errorMsg.style.animation = 'fadeOut 0.3s ease';
     setTimeout(() => {
       errorMsg.style.display = 'none';
       errorMsg.style.animation = '';
+      errorMsg.classList.remove('success-msg');
     }, 300);
   }, delay);
+}
+
+function showError(message) {
+  showStatus(message, 'error');
 }
 
 // Listen for orientation changes on mobile
@@ -451,3 +458,5 @@ function createNetworkStatusIndicator() {
   document.body.appendChild(indicator);
   return indicator;
 }
+
+window.loginWithProvider = loginWithProvider;

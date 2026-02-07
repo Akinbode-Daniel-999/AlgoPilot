@@ -497,6 +497,13 @@ body {
   display: none;
 }
 
+.error-msg.success-msg {
+  color: var(--success-color);
+  background: rgba(39, 174, 96, 0.12);
+  border-color: rgba(39, 174, 96, 0.3);
+  animation: none;
+}
+
 @keyframes shake {
   10%, 90% { transform: translateX(-1px); }
   20%, 80% { transform: translateX(2px); }
@@ -536,29 +543,32 @@ body {
 
 /* Social Login */
 .social-login {
-  display: flex;
-  justify-content: center;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--spacing-md);
   margin-bottom: var(--spacing-xl);
 }
 
 .social-btn {
-  width: 2.75rem;
-  height: 2.75rem;
-  border-radius: 50%;
+  width: 100%;
+  min-height: 2.875rem;
+  padding: 0.65rem 0.9rem;
+  border-radius: var(--radius-lg);
   border: 1px solid var(--input-border);
   background: var(--input-bg);
   color: var(--text-color);
   cursor: pointer;
   transition: all var(--transition-normal);
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: var(--font-size-md);
+  gap: 0.45rem;
+  font-size: var(--font-size-sm);
+  font-weight: 600;
 }
 
 .social-btn:hover {
-  transform: translateY(-2px) scale(1.1);
+  transform: translateY(-2px);
   border-color: var(--accent-color);
   background: var(--card-bg);
   box-shadow: 0 5px 15px var(--shadow-light);
@@ -667,12 +677,13 @@ body {
   }
   
   .social-login {
+    grid-template-columns: 1fr;
     gap: var(--spacing-sm);
   }
   
   .social-btn {
-    width: 2.5rem;
-    height: 2.5rem;
+    min-height: 2.5rem;
+    font-size: var(--font-size-xs);
   }
   
   .ticker-item {

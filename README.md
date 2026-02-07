@@ -196,7 +196,7 @@ Tested and working on:
 
 ## 🔮 Future Enhancements
 
-- Real API integration (Binance, Coinbase)
+- Multi-provider expansion (Binance WebSockets, premium institutional feeds)
 - Multiple trading strategies
 - Email notifications for signals
 - Trade history export (CSV/PDF)
