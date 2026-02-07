@@ -63,9 +63,20 @@ function initForgotForm() {
   const form = document.getElementById('forgotForm');
   const resetButton = document.getElementById('resetButton');
   const resetButtonText = document.getElementById('resetButtonText');
+  const resendCodeBtn = document.getElementById('resendCodeBtn');
+  const verificationStep = document.getElementById('verificationStep');
+  const subtitle = document.getElementById('flowSubtitle');
+
+  let pendingUserId = null;
+  let pendingCode = null;
 
   form.addEventListener('submit', (event) => {
     event.preventDefault();
+
+    if (!verificationStep.hidden) {
+      handlePasswordReset(pendingUserId, pendingCode);
+      return;
+    }
 
     const identifier = document.getElementById('resetIdentifier').value.trim();
     if (!identifier) {
@@ -74,7 +85,7 @@ function initForgotForm() {
     }
 
     resetButton.disabled = true;
-    resetButtonText.textContent = 'Sending reset link...';
+    resetButtonText.textContent = 'Verifying account...';
 
     setTimeout(() => {
       const users = JSON.parse(localStorage.getItem(AUTH_STORAGE_KEY) || '[]');
@@ -91,10 +102,81 @@ function initForgotForm() {
         return;
       }
 
-      showStatus(`Reset instructions have been sent to ${match.email || 'your email'}.`, 'success');
-      resetButtonText.textContent = 'Check your inbox';
-    }, 900);
+      if (match.provider) {
+        const providerName = match.provider.charAt(0).toUpperCase() + match.provider.slice(1);
+        showStatus(`This account uses ${providerName} login. Please continue with ${providerName} on the login page.`, 'info');
+        resetButton.disabled = false;
+        resetButtonText.textContent = 'Send reset instructions';
+        return;
+      }
+
+      pendingUserId = match.id;
+      pendingCode = String(Math.floor(100000 + Math.random() * 900000));
+
+      verificationStep.hidden = false;
+      resendCodeBtn.hidden = false;
+      subtitle.textContent = 'Enter the verification code and your new password.';
+      resetButton.disabled = false;
+      resetButtonText.textContent = 'Reset password';
+
+      showStatus(`Verification code: ${pendingCode} (demo mode).`, 'info');
+    }, 700);
   });
+
+  resendCodeBtn.addEventListener('click', () => {
+    if (!pendingUserId) return;
+    pendingCode = String(Math.floor(100000 + Math.random() * 900000));
+    showStatus(`New verification code: ${pendingCode} (demo mode).`, 'info');
+  });
+}
+
+function handlePasswordReset(pendingUserId, pendingCode) {
+  const inputCode = document.getElementById('resetCode').value.trim();
+  const newPassword = document.getElementById('newPassword').value;
+  const confirmPassword = document.getElementById('confirmPassword').value;
+
+  if (!pendingUserId || !pendingCode) {
+    showStatus('Reset session expired. Please request a new code.', 'error');
+    return;
+  }
+
+  if (!/^\d{6}$/.test(inputCode)) {
+    showStatus('Please enter a valid 6-digit verification code.', 'error');
+    return;
+  }
+
+  if (inputCode !== pendingCode) {
+    showStatus('Invalid verification code. Please try again.', 'error');
+    return;
+  }
+
+  if (newPassword.length < 8) {
+    showStatus('New password must be at least 8 characters.', 'error');
+    return;
+  }
+
+  if (newPassword !== confirmPassword) {
+    showStatus('Password confirmation does not match.', 'error');
+    return;
+  }
+
+  const users = JSON.parse(localStorage.getItem(AUTH_STORAGE_KEY) || '[]');
+  const userIndex = users.findIndex((user) => user.id === pendingUserId);
+
+  if (userIndex === -1) {
+    showStatus('Account not found. Please restart reset flow.', 'error');
+    return;
+  }
+
+  users[userIndex].password = newPassword;
+  users[userIndex].updatedAt = new Date().toISOString();
+  localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(users));
+
+  showStatus('Password reset successful. Redirecting to login...', 'success');
+
+  setTimeout(() => {
+    window.location.href = 'login.html';
+  }, 1200);
 }
 
 function showStatus(message, type) {
